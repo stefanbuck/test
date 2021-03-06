@@ -1,0 +1,94 @@
+name: Run cookiecutter
+on:
+  push:
+    paths:
+      - cookiecutter.json
+jobs:
+  "Setup-repository":
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install cookiecutter
+
+      - name: Scaffolding repository
+        run: cookiecutter . --no-input -o ./cookiecutter-temp
+      
+      - name: Move files to root
+        shell: bash
+        run: |
+          find ./ -maxdepth 1 ! -name 'cookiecutter-temp' ! -name '.' ! -name '.git' -exec rm -rf {} + && \
+          cp -R ./cookiecutter-temp/*/* . && \
+          rm -rf ./cookiecutter-temp/
+      
+      - name: Reinitialize git repository
+        shell: bash
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com" && \
+          git config --global user.name "github-actions[bot]" && \
+          git checkout --orphan temp-branch && \
+          git add . && \
+          git commit -m 'Initial commit' && \
+          git push origin temp-branch:main -f
+
+
+# name: Setup repository
+# on:
+#   push
+# jobs:
+#   "Setup-repository":
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+
+      # - run: echo "[Edit](https://github.com/$GITHUB_REPOSITORY/edit/main/cookiecutter-answers.json)" > README.md
+      # - run: cp cookiecutter.json cookiecutter-answers.json
+
+      # - name: Reinitialize git repository
+      #   shell: bash
+      #   run: |
+      #     git config --global user.email "github-actions[bot]@users.noreply.github.com" && \
+      #     git config --global user.name "github-actions[bot]" && \
+      #     git add . && \
+      #     git commit -m 'Add readme' && \
+      #     git push origin main
+
+
+# name: Setup repository
+# on:
+#   issues:
+#     types: [opened]
+# jobs:
+#   "Setup-repository":
+#     runs-on: ubuntu-latest
+#     if: github.event.issue.title == 'Repo setup'
+#     steps:
+#       - uses: actions/checkout@v2
+
+      # - run: cat $GITHUB_EVENT_PATH
+
+#       - run: |
+#           curl -X POST \
+#             -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+#             -H "Accept: application/vnd.github.v3+json" \
+#             -H 'Content-Type: application/json' \
+#             ${{ github.event.issue.comments_url }} \
+#             -d '{"body":"Setup in progress"}' \
+#             --fail
+#       # run: echo ${{ github.event.issue.title }}
+#       # - run: echo ${{ github.event.issue.body }}
+
+#       - run: |
+#           curl -X PATCH \
+#             -H 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+#             -H "Accept: application/vnd.github.v3+json" \
+#             -H 'Content-Type: application/json' \
+#             ${{ github.event.issue.url }} \
+#             -d '{"state":"closed"}' \
+#             --fail
+
