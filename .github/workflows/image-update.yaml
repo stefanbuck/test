@@ -5,4 +5,5 @@ jobs:
   main:
     runs-on: ubuntu-latest
     steps:
+      - run: cat $GITHUB_EVENT_PATH | jq -e '.client_payload'
       - run: cat $GITHUB_EVENT_PATH
