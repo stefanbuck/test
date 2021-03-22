@@ -1,0 +1,8 @@
+on:
+  repository_dispatch:
+    types: [image_update]
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - run: cat $GITHUB_EVENT_PATH
